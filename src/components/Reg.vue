@@ -1,6 +1,6 @@
 <template>
   <div class="conent">
-    <h3>登陆</h3>
+    <h3>注册</h3>
     <h5>这是一个简单的记账本</h5>
     <el-form ref="form" :model="form" label-width="0px">
       <el-form-item label>
@@ -11,14 +11,21 @@
           v-model="form.password"
           placeholder="密码"
           type="password"
+        ></el-input>
+      </el-form-item>  
+      <el-form-item label>
+        <el-input
+          v-model="form.password2"
+          placeholder="重复密码"
+          type="password"
           @keyup.enter.native="Submit"
         ></el-input>
       </el-form-item>
 
       <el-form-item>
-        <el-button type="primary" style="margin-right: 20px" @click="Submit">登陆</el-button>
-        <router-link to="/auth/reg">
-          <el-button>注册</el-button>
+        <el-button type="primary" style="margin-right: 20px" @click="Submit">提交</el-button>
+        <router-link to="/auth/login">
+          <el-button>登陆</el-button>
         </router-link>
       </el-form-item>
     </el-form>
@@ -27,26 +34,30 @@
 
 <script>
 import axios from "axios";
+axios.defaults.withCredentials = true;
 export default {
-  name: "login",
+  name: "reg",
   data: function() {
     return {
       form: {
         name: "",
-        password: ""
+        password: "",
+        password2: ""
       }
     };
   },
   methods: {
     Submit() {
-      axios.post("/auth/login", this.form, {withCredentials:true}).then(resp => {
-        console.log(resp.data)
-        if (resp.data.ret == 0) {
-          this.showMessage("登陆成功", "success");
-          sessionStorage.setItem("uname", resp.data.name);
-          this.$router.push({ path: "/" });
-        } else {
-          this.showMessage(resp.data.msg, "error");
+      if(this.form.password != this.form.password2){
+        this.showMessage("两次密码不一样","warning")
+        return
+      }
+      axios.post("/auth/reg", this.form).then(resp => {
+        if (resp.data.ret==0){
+          this.showMessage("注册成功",'success')
+          this.$router.push({path:'/'})
+        }else{
+          this.showMessage(resp.data.msg, 'error')
         }
       });
     },
@@ -57,9 +68,10 @@ export default {
       });
     }
   },
-  mounted: function() {},
-  created() {
-    document.title = "登陆";
+  mounted: function() {
+  },
+  created(){
+    document.title="注册"
   }
 };
 </script>
