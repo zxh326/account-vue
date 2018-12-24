@@ -28,7 +28,12 @@
       <el-form :model="form">
         <el-form-item label="时间" :label-width="formLabelWidth">
           <el-col :span="formSpan">
-            <el-date-picker v-model="form.date" value-format="yyyy-MM-dd" type="date" placeholder="选择日期"></el-date-picker>
+            <el-date-picker
+              v-model="form.date"
+              value-format="yyyy-MM-dd"
+              type="date"
+              placeholder="选择日期"
+            ></el-date-picker>
           </el-col>
         </el-form-item>
         <el-form-item label="支出/收入" :label-width="formLabelWidth">
@@ -113,7 +118,13 @@ export default {
     },
     submit() {
       // eslint-disable-next-line
-      axios.post("/account/new", this.form).then(resp => {});
+      axios.post("/account/new", this.form).then(resp => {
+        if (resp.data.ret == 0) {
+          this.$message({ message: resp.data.msg, type: "success" });
+          this.$router.push({ path: "/" });
+          this.dialogFormVisible = false;
+        }
+      });
     }
   }
 };

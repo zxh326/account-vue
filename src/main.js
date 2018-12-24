@@ -6,10 +6,12 @@ import axios from "axios";
 
 Vue.config.productionTip = false
 axios.defaults.withCredentials = true
-axios.defaults.baseURL = 'http://localhost:3000';
+// localhost 不给set-cookie？
+// axios.dafaults.baseURL= 'http://localhost:3000'
+
+axios.defaults.baseURL = 'http://127.0.0.1:3000';
 // 未登录拦截
 axios.interceptors.response.use(function (response) {
-  // 对响应数据做点什么
  if(response.data.ret==-1){
   this.$router.push({path:'/auth/login'});
  }

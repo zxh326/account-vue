@@ -27,6 +27,7 @@
 
 <script>
 import axios from "axios";
+axios.defaults.withCredentials = true
 export default {
   name: "login",
   data: function() {
@@ -39,8 +40,8 @@ export default {
   },
   methods: {
     Submit() {
-      axios.post("/auth/login", this.form, {withCredentials:true}).then(resp => {
-        console.log(resp.data)
+      axios.post("/auth/login", this.form).then(resp => {
+        console.log(resp.headers)
         if (resp.data.ret == 0) {
           this.showMessage("登陆成功", "success");
           sessionStorage.setItem("uname", resp.data.name);
