@@ -1,23 +1,29 @@
  <template>
-  <el-table :data="detail" style="width: 100%" stripe>
-    <el-table-column prop="date" label="日期" width="180" :formatter="formatterdate"></el-table-column>
-    <el-table-column prop="payornot" label="支出/收入" width="180" :formatter="formatterpay"></el-table-column>
-    <el-table-column prop="money" label="金额"></el-table-column>
-    <el-table-column prop="type" label="分类" :formatter="formattertype"></el-table-column>
-    <el-table-column prop="remark" label="备注"></el-table-column>
-    <el-table-column label="操作">
-      <template slot-scope="scope">
-        <el-button size="mini" @click="dialogFormVisible = true">编辑</el-button>
-        <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
-      </template>
-    </el-table-column>
-
-    <el-dialog title="新消费/支出" :visible.sync="dialogFormVisible" width="50%">
-      <el-form :model="form">
+  <div>
+    <el-table :data="detail" style="width: 100%" stripe>
+      <el-table-column prop="date" label="日期" width="180" :formatter="formatterdate"></el-table-column>
+      <el-table-column prop="payornot" label="支出/收入" width="180" :formatter="formatterpay"></el-table-column>
+      <el-table-column prop="money" label="金额"></el-table-column>
+      <el-table-column prop="type" label="分类" :formatter="formattertype"></el-table-column>
+      <el-table-column prop="remark" label="备注"></el-table-column>
+      <el-table-column label="操作">
+        <template slot-scope="scope">
+          <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
+          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-dialog
+      title="修改记录"
+      :visible.sync="dialogFormVisible"
+      width="50%"
+      v-model="dialogFormVisible"
+    >
+      <el-form :model="editObj">
         <el-form-item label="时间" :label-width="formLabelWidth">
           <el-col :span="formSpan">
             <el-date-picker
-              v-model="form.date"
+              v-model="editObj.date"
               value-format="yyyy-MM-dd"
               type="date"
               placeholder="选择日期"
@@ -26,7 +32,7 @@
         </el-form-item>
         <el-form-item label="支出/收入" :label-width="formLabelWidth">
           <el-col :span="formSpan">
-            <el-select v-model="form.payorno" placeholder="请选择类别">
+            <el-select v-model="editObj.payorno" placeholder="请选择类别">
               <el-option label="支出" value="0"></el-option>
               <el-option label="收入" value="1"></el-option>
             </el-select>
@@ -34,12 +40,17 @@
         </el-form-item>
         <el-form-item label="金额" :label-width="formLabelWidth">
           <el-col :span="formSpan">
-            <el-input-number v-model="form.money" placeholder="请输入内容" :min="0" :max="10000000000"></el-input-number>
+            <el-input-number
+              v-model="editObj.money"
+              placeholder="请输入内容"
+              :min="0"
+              :max="10000000000"
+            ></el-input-number>
           </el-col>
         </el-form-item>
         <el-form-item label="分类" :label-width="formLabelWidth">
           <el-col :span="formSpan">
-            <el-select v-model="form.type" placeholder="请选择分类">
+            <el-select v-model="editObj.type" placeholder="请选择分类">
               <el-option label="餐饮" value="0"></el-option>
               <el-option label="零食" value="1"></el-option>
               <el-option label="日用" value="2"></el-option>
@@ -52,16 +63,16 @@
         </el-form-item>
         <el-form-item label="备注" :label-width="formLabelWidth">
           <el-col :span="12">
-            <el-input v-model="form.remark" placeholder="请输入内容"></el-input>
+            <el-input v-model="editObj.remark" placeholder="请输入内容"></el-input>
           </el-col>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="diagClose">取 消</el-button>
-        <el-button type="primary">确 定</el-button>
+        <el-button type="primary" @click="editDo">确 定</el-button>
       </div>
     </el-dialog>
-  </el-table>
+  </div>
 </template>
 
   <script>
@@ -73,6 +84,7 @@ export default {
     return {
       detail: [],
       dialogFormVisible: false,
+      editObj: {},
       form: {
         date: "",
         payorno: "1",
@@ -118,18 +130,28 @@ export default {
           return "娱乐";
       }
     },
-    handleEdit(index, row) {
+    handleEdit(row) {
+      this.editObj = row;
+      this.editObj.date = row.date.slice(0, 10);
       this.dialogFormVisible = true;
     },
     handleDelete(index, row) {
-      console.log(index, row);
-      console.log(this.dialogFormVisible);
+      axios.post("account/delete", { id: row.id }).then(resp => {
+        this.detail.pop(index);
+        console.log(resp);
+      });
     },
     diagClose() {
       console.log(1);
       // this.activeIndex = "1";
       this.$router.push({ path: "/" });
       this.dialogFormVisible = false;
+    },
+    editDo() {
+      axios.post("/account/update", this.editObj).then(resp => {
+        this.dialogFormVisible = false;
+        console.log(resp);
+      });
     }
   }
 };
